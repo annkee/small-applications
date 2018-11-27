@@ -1,0 +1,59 @@
+<configuration scan="true" scanPeriod="600 seconds" debug="false">
+
+    <!--定义日志文件的存储地址 勿在 logback 的配置中使用相对路径 -->
+    <property name="LOG_HOME" value="./logs/small-applications"/>
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder charset="UTF-8" class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出，%d：日期，%thread：线程名，%-5level：级别从左显示5个字符宽度，%msg：日志消息，%n：换行符 -->
+            <pattern>
+                %highlight(%d{yyyy-MM-dd HH:mm:ss}) [%thread] %highlight([%level]) %cyan(%logger{50}) - %highlight(%msg) %n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 按照每天生成日志文件，并且限制每个日志的大小，保存60天 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/sys_log/small-applications_sys_%d{yyyy-MM-dd}_%i.log</FileNamePattern>
+            <MaxHistory>60</MaxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder charset="UTF-8" class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] [%-5level] %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 出错日志 appender  -->
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/error_log/small-applications_error_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder charset="UTF-8" class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] [%-5level] %logger{50} - %msg%n</pattern>
+        </encoder>
+        <!-- 只打印错误日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+
+    <!-- 根日志输出，子节点继承父节点日志级别，子节点设置日志级别有效，未设置则默认继承 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR"/>
+    </root>
+
+</configuration>
+

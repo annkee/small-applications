@@ -1,0 +1,67 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: small-applications
+  datasource:
+    readSize: 1
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/vms?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+    maxActive: 20
+    initialSize: 5
+    maxWait: 60000
+    minIdle: 5
+    filters: stat
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    publisher-confirms: true
+    virtual-host: /
+  http:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.annkee.applications.domain
+
+
+mapper:
+  mappers:  com.annkee.applications.dao
+  not-empty: false
+  identity: MYSQL
+
+#pagehelper
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+  returnPageInfo: check
+
+download-qr-param: http://localhost:8000/dl/download.html?appId=
+
+# 指定log配置文件
+logging:
+  config: classpath:logback.xml
+  level: debug
+
