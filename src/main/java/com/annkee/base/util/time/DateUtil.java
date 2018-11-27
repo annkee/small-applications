@@ -1,4 +1,4 @@
-package com.annkee.base.util;
+package com.annkee.base.util.time;
 
 import com.annkee.base.enums.ResultCodeEnum;
 import com.annkee.base.exception.BaseException;
