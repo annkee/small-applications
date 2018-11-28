@@ -1,4 +1,4 @@
-package com.annkee.applications.sms;
+package com.annkee.applications.module.sms;
 
 import org.junit.Test;
 

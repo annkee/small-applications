@@ -1,8 +1,8 @@
 package com.annkee.base.task;
 
 
-import com.annkee.applications.mail.MailService;
-import com.annkee.applications.weather.WeatherService;
+import com.annkee.applications.module.mail.MailService;
+import com.annkee.applications.module.weather.WeatherService;
 import com.annkee.base.enums.ResultCodeEnum;
 import com.annkee.base.util.ResultVoUtil;
 import com.annkee.base.vo.ResultVO;

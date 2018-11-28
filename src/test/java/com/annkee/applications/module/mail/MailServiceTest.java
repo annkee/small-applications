@@ -1,4 +1,4 @@
-package com.annkee.applications.mail;
+package com.annkee.applications.module.mail;
 
 import org.junit.Test;
 

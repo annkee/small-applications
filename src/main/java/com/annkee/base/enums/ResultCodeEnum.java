@@ -12,14 +12,21 @@ import lombok.Getter;
 @Getter
 public enum ResultCodeEnum {
     
-    SUCCESS(200, "成功"),
-    SQLException(5001, "数据库异常"),
-    PARAM_ERROR(504025, "参数错误"),
-    AES_ENCRYPT_ERROR(504026, "AES加密错误"),
-    AES_DECRYPT_ERROR(504027, "AES解密错误"),
-    SYSTEM_ERROR(504028, "系统异常"),
-    APP_PARSE_ERROR(504029, "app解析异常"),
-    USER_LOGIN_ERROR(504030, "登陆异常"),
+    SUCCESS(9999, "成功"),
+    
+    SQLException(50001, "数据库异常"),
+    
+    PARAM_ERROR(50025, "参数错误"),
+    
+    AES_ENCRYPT_ERROR(50026, "AES加密错误"),
+    
+    AES_DECRYPT_ERROR(50027, "AES解密错误"),
+    
+    SYSTEM_ERROR(50028, "系统异常"),
+    
+    APP_PARSE_ERROR(50029, "app解析异常"),
+    USER_LOGIN_ERROR(50030, "登陆异常"),
+    UPLOAD_FILE_ERROR(50031, "上传文件失败"),
     
     BEIJING(54511, "北京"),
     ;

@@ -1,4 +1,4 @@
-package com.annkee.applications.mail;
+package com.annkee.applications.module.mail;
 
 import com.annkee.base.enums.MailEnum;
 import lombok.extern.slf4j.Slf4j;
