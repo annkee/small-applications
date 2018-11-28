@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     private Map<String, UserModel> userMap = new HashMap<>();
     
     public UserServiceImpl() {
-        log.warn("向实体类插入数据");
+        log.warn("发布实体对象内容，向实体类插入数据");
         UserModel user = new UserModel();
         user.setSalt(UUID.randomUUID().toString().replace("-", ""));
         user.setUsername("test1");
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
     
     @Override
     public UserModel getUser(String userId) {
-        log.warn("userMap是:" + userMap);
+        log.warn("userMap是:{}", userMap);
         return userMap.get(userId);
     }
     
