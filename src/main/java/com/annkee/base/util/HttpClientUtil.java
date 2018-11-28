@@ -101,7 +101,7 @@ public class HttpClientUtil {
     }
     
     /**
-     * 携带头信息，参数的post请求，参数编码 UTF-8，参数为键值对
+     * post 携带头信息，参数为map键值对，参数编码 UTF-8，参数为键值对
      *
      * @param url     目标地址
      * @param headers 请求头
@@ -119,7 +119,7 @@ public class HttpClientUtil {
             httpPost.setEntity(new UrlEncodedFormEntity(params2NVPs(params), "UTF-8"));
             return httpResult(httpPost);
         } catch (UnsupportedEncodingException e) {
-            log.error("postKeyValue error: {}, {}" + e.getMessage(), e);
+            log.error("postKeyValue error: {}, {}" , e.getMessage(), e);
             e.printStackTrace();
             return null;
         }

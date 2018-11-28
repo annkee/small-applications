@@ -37,9 +37,10 @@ spring:
       max-file-size: 200MB
       max-request-size: 200MB
   redis:
-    host: localhost
+    host: 127.0.0.1
     port: 6379
-    password: 123456
+#    password: 123456
+    database: 0
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.annkee.applications.domain

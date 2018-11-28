@@ -20,8 +20,8 @@ public class ConfigFileProperty {
     @Value("${spring.redis.port}")
     private String port;
     
-    @Value("${spring.redis.password}")
-    private String redisPassword;
+//    @Value("${spring.redis.password}")
+//    private String redisPassword;
     
     public ConfigFileProperty() {
     }

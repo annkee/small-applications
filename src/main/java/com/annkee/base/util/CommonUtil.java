@@ -30,7 +30,6 @@ import java.util.UUID;
 @Slf4j
 public class CommonUtil {
     
-    
     /**
      * 密钥规则
      */

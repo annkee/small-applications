@@ -51,7 +51,7 @@ public class UserService {
     public String generateJwtToken(String username) {
         Object o = redisTemplate.opsForValue().get("token:" + username);
         String value = String.valueOf(o);
-        if (value == null) {
+        if (o == null) {
             
             String salt = JwtUtil.generateSalt();
             log.warn("salt:{}", salt);
