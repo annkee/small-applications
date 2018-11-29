@@ -9,6 +9,9 @@ import org.dom4j.Element;
 import org.dom4j.dom.DOMDocument;
 import org.dom4j.dom.DOMElement;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,6 +26,29 @@ import java.util.*;
  */
 @Slf4j
 public class XmlUtil {
+    
+    /**
+     * 对象转xml
+     *
+     * @param clazz User.class
+     * @param obj user
+     * @return
+     */
+    public static String objectToXml(Object obj, Class<?> clazz) {
+        
+        StringWriter stringWriter = new StringWriter();
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_ENCODING, "GB2312");
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(obj, stringWriter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return stringWriter.toString();
+    }
+    
     
     /**
      * xml字符串转对象
