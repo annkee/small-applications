@@ -1,6 +1,7 @@
 package com.annkee.base.util.xml;
 
 import com.annkee.base.util.time.DateUtil;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -8,6 +9,10 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.dom.DOMDocument;
 import org.dom4j.dom.DOMElement;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -31,8 +36,10 @@ public class XmlUtil {
      * 对象转xml
      *
      * @param clazz User.class
-     * @param obj user
+     * @param obj   user
      * @return
+     * @XmlRootElement(name = "ApplyInfo") 在实体类型类上加这个标识根元素
+     * @XmlElement(name = "GeneralInfo") 这个加在getter方法上，节点
      */
     public static String objectToXml(Object obj, Class<?> clazz) {
         
@@ -198,11 +205,20 @@ public class XmlUtil {
     }
     
     
-    
-    
-    
-    /*=============================================================封装XML================================================================*/
-    
+    public Object xml2json(String xmlStr) {
+        
+        JSONObject xmlJSONObj = null;
+        String result = null;
+        try {
+            xmlJSONObj = XML.toJSONObject(xmlStr);
+            //设置缩进
+            result = xmlJSONObj.toString(4);
+        } catch (JSONException e) {
+            log.error("---error: {}", e.getMessage());
+        }
+        log.warn("---result: {}", result);
+        return result;
+    }
     
     /**
      * 对象转xml字符串
