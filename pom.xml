@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ctsig</groupId>
+    <groupId>com.annkee</groupId>
     <artifactId>small-applications</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0_RC</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.18</version>
+            <version>1.18.2</version>
         </dependency>
 
         <!--tomcat-->
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.38</version>
+            <version>8.0.11</version>
         </dependency>
         <!-- mybatis 支持 -->
         <dependency>
@@ -347,6 +347,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <warName>smallapplications</warName>
                 </configuration>

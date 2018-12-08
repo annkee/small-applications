@@ -4,8 +4,6 @@ import com.annkee.base.constant.ProjectConstant;
 import com.annkee.base.enums.ResultCodeEnum;
 import com.annkee.base.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -16,10 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 工具类
@@ -29,7 +24,7 @@ import java.util.UUID;
  */
 @Slf4j
 public class CommonUtil {
-    
+
     /**
      * 密钥规则
      */
@@ -39,7 +34,7 @@ public class CommonUtil {
      */
     private static final String IVPARAMETER = "10awe90a905e3400";
     private static final String FORMATTYPE = "utf-8";
-    
+
     /**
      * 随机字符串
      *
@@ -48,7 +43,7 @@ public class CommonUtil {
     public static String create_nonce_str() {
         return UUID.randomUUID().toString();
     }
-    
+
     /**
      * 生成随机数
      *
@@ -67,22 +62,22 @@ public class CommonUtil {
         }
         return randomNumStr;
     }
-    
+
     /**
      * 订单号生成规则文档
      *
      * @return
      */
     public static synchronized Long genUniqueKey() {
-        
+
         Random random = new Random();
         Integer number = random.nextInt(90000) + 10000;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
-        
+
         return Long.valueOf(dateFormat.format(new Date()) + number);
-        
+
     }
-    
+
     /**
      * 对message进行sha1或者MD5的加密
      *
@@ -105,7 +100,7 @@ public class CommonUtil {
         }
         return null;
     }
-    
+
     /**
      * aes加密
      *
@@ -117,7 +112,7 @@ public class CommonUtil {
      * @throws Exception
      */
     public static String aesEncrypt(String str, String encodingFormat, String sKey, String ivParameter) {
-        
+
         Cipher cipher = null;
         try {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -127,7 +122,7 @@ public class CommonUtil {
             IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
             byte[] encrypted = cipher.doFinal(str.getBytes(encodingFormat));
-            String encode = new BASE64Encoder().encode(encrypted);
+            String encode = Base64.getEncoder().encodeToString(encrypted);
             //此处使用BASE64做转码,去掉回车
             return encode.replaceAll(System.getProperty("line.separator"), "");
         } catch (Exception e) {
@@ -135,7 +130,7 @@ public class CommonUtil {
             throw new BaseException(ResultCodeEnum.AES_ENCRYPT_ERROR);
         }
     }
-    
+
     /**
      * 解密
      *
@@ -154,17 +149,17 @@ public class CommonUtil {
             IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
             //先用base64解密
-            byte[] encrypted1 = new BASE64Decoder().decodeBuffer(str);
+            byte[] encrypted1 = Base64.getDecoder().decode(str);
             byte[] original = cipher.doFinal(encrypted1);
             String originalString = new String(original, encodingFormat);
             return originalString;
         } catch (Exception e) {
             log.error("aesDecrypt error:{}", e.getMessage());
-            
+
             throw new BaseException(ResultCodeEnum.AES_DECRYPT_ERROR);
         }
     }
-    
+
     /**
      * 获取请求头传来的token
      *
@@ -172,33 +167,33 @@ public class CommonUtil {
      * @return
      */
     public static String getToken(HttpServletRequest request) {
-        
+
         Enumeration headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String key = String.valueOf(headerNames.nextElement());
             log.warn("header keys={}", key);
-            
+
             if (ProjectConstant.AUTHORIZATION.equalsIgnoreCase(key)) {
                 String value = request.getHeader(key);
                 log.warn("value={}", value);
                 return value;
             }
-            
+
         }
         return null;
-        
+
     }
-    
+
     public static String parseDouble2Str(double param) throws ParseException {
         //double保留2位小数，返回string
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         return decimalFormat.format(param);
     }
-    
+
     public static double parseDouble2Double(double param) throws ParseException {
         //double保留2位小数，返回double
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         return Double.parseDouble(decimalFormat.format(param));
     }
-    
+
 }
