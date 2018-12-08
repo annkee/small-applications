@@ -9,6 +9,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -29,12 +30,16 @@ public class CommonUtil {
      * 密钥规则
      */
     private static final String RULE = "JH_INS_STUDENT_S";
+
     /**
      * 偏移量
      */
     private static final String IVPARAMETER = "10awe90a905e3400";
-    private static final String FORMATTYPE = "utf-8";
+    
+    private static final String UTF8 = "UTF-8";
 
+    private static final String SHA256 = "SHA-256";
+    
     /**
      * 随机字符串
      *
@@ -194,6 +199,46 @@ public class CommonUtil {
         //double保留2位小数，返回double
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         return Double.parseDouble(decimalFormat.format(param));
+    }
+
+    
+    /**
+     * SHA256加密
+     */
+    public static String sha256Hex(String data) {
+        try {
+            return toHexString(sha256(data.getBytes(UTF8)));
+        } catch (UnsupportedEncodingException e) {
+            log.error("MD5Util SHA256 加密出错", e);
+            return null;
+        }
+    }
+    
+    private static String toHexString(byte[] b) {
+        StringBuffer stringbuffer = new StringBuffer();
+        for (int i = 0; i < b.length; i++) {
+            stringbuffer.append(IVPARAMETER.charAt(b[i] >>> 4 & 0x0F));
+            stringbuffer.append(IVPARAMETER.charAt(b[i] & 0x0F));
+        }
+        return stringbuffer.toString();
+    }
+    
+    /**
+     * SHA-256加密，并返回作为一个十六进制字节
+     */
+    public static byte[] sha256(byte[] data) {
+        return getDigestBySha().digest(data);
+    }
+    
+    /**
+     * 返回 MessageDigest SHA-256
+     */
+    private static MessageDigest getDigestBySha() {
+        try {
+            return MessageDigest.getInstance(SHA256);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
