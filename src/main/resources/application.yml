@@ -43,6 +43,7 @@ spring:
     database: 0
 mybatis:
   mapper-locations: classpath:mapper/*.xml
+  config-location: classpath:mybatis-config.xml
   type-aliases-package: com.annkee.applications.domain
 
 
