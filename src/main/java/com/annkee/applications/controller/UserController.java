@@ -69,4 +69,5 @@ public class UserController {
         SecurityUtils.getSubject().logout();
         return ResponseEntity.ok().build();
     }
+
 }
