@@ -7,16 +7,15 @@ package com.annkee.base.util.excel;
 
 import com.annkee.base.util.time.DateUtil;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -194,6 +193,37 @@ public class ExcelUtil {
                 Cell cell = row.createCell(j);
                 cell.setCellValue(rowData.get(i).get(j) + "");
             }
+        }
+        return true;
+    }
+    
+    /**
+     * 写入excel文件
+     *
+     * @param filePath
+     * @param rowData
+     * @return
+     */
+    public boolean write(String filePath, List<List<String>> rowData) {
+        File file = new File(filePath);
+        try {
+            // 创建工作薄
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            // 创建工作表
+            HSSFSheet sheet = workbook.createSheet("sheet1");
+            
+            for (int row = 0; row < 10; row++) {
+                HSSFRow rows = sheet.createRow(row);
+                for (int col = 0; col < 10; col++) {
+                    // 向工作表中添加数据
+                    rows.createCell(col).setCellValue("data" + row + col);
+                }
+            }
+            
+            FileOutputStream xlsStream = new FileOutputStream(file);
+            workbook.write(xlsStream);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return true;
     }
