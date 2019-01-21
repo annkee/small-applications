@@ -43,7 +43,6 @@ spring:
     database: 0
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  config-location: classpath:mybatis-config.xml
   type-aliases-package: com.annkee.applications.domain
 
 
@@ -65,5 +64,4 @@ download-qr-param: http://localhost:8000/dl/download.html?appId=
 # 指定log配置文件
 logging:
   config: classpath:logback.xml
-  level: debug
-
+  level: DEBUG

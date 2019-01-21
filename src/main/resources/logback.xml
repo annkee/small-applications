@@ -48,6 +48,10 @@
     </appender>
 
 
+
+    <!--myibatis log configure 控制台输出语句-->
+    <logger name="com.annkee.applications.dao" level="DEBUG"/>
+
     <!-- 根日志输出，子节点继承父节点日志级别，子节点设置日志级别有效，未设置则默认继承 -->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
