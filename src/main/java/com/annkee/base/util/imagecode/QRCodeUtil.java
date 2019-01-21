@@ -1,15 +1,26 @@
 package com.annkee.base.util.imagecode;
 
-import com.alibaba.fastjson.JSONObject;
-import com.annkee.base.constant.ProjectConstant;
-import com.annkee.base.util.HttpClientUtil;
-import com.google.zxing.*;
+import com.aliyun.openservices.ClientException;
+import com.aliyun.openservices.ServiceException;
+import com.aliyun.openservices.oss.OSSClient;
+import com.aliyun.openservices.oss.OSSErrorCode;
+import com.aliyun.openservices.oss.OSSException;
+import com.aliyun.openservices.oss.model.CannedAccessControlList;
+import com.aliyun.openservices.oss.model.ObjectMetadata;
+import com.annkee.base.constant.ConfigFileProperty;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
+import javax.annotation.Resource;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
@@ -17,7 +28,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -27,33 +37,38 @@ import java.util.Map;
  * @date 2018/7/11
  */
 @Slf4j
+@Component
 public class QRCodeUtil {
-
+    
     /**
      * 二维码写码器
      */
     private static MultiFormatWriter multiWriter = new MultiFormatWriter();
-
-
+    
     private static final String CHARSET = "utf-8";
-    private static final String FORMAT_NAME = "JPG";
-
+    
+    private static final String FORMAT_NAME = ".jpg";
+    
+    @Resource
+    private ConfigFileProperty configFileProperty;
+    
+    /**
+     * 阿里云OSS_ENDPOINT  青岛Url
+     */
+    private static String OSS_ENDPOINT = "http://oss-cn-beijing.aliyuncs.com";
+    private static String ossPath = "http://annkee.oss-cn-beijing.aliyuncs.com/";
+    
+    /**
+     * 阿里云BUCKET_NAME  OSS
+     */
+    private static String BUCKET_NAME = "annkee";
+    
     /**
      * 二维码尺寸
      */
-    private static final int QRCODE_SIZE = 300;
-
-    /**
-     * LOGO宽度
-     */
-    private static final int WIDTH = 50;
-
-    /**
-     * LOGO高度
-     */
-    private static final int HEIGHT = 50;
-
-    public static byte[] readInputStream(InputStream inStream) throws Exception {
+    private final int QRCODE_SIZE = 175;
+    
+    public byte[] readInputStream(InputStream inStream) throws Exception {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         //创建一个Buffer字符串
         byte[] buffer = new byte[1024];
@@ -69,20 +84,18 @@ public class QRCodeUtil {
         //把outStream里的数据写入内存
         return outStream.toByteArray();
     }
-
+    
     /**
      * 在生成的二维码中插入图片
      *
-     * @param source
-     * @param imgPath
-     * @param needCompress
+     * @param backgroundImage 最底下的图
+     * @param bufferedImage   上面的图
      * @throws Exception
      */
-    private static void insertImage(BufferedImage source, String imgPath, boolean needCompress) {
+    private String insertImage(String backgroundImage, BufferedImage bufferedImage) {
         try {
-
             //new一个URL对象
-            URL url = new URL(imgPath);
+            URL url = new URL(backgroundImage);
             //打开链接
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             //设置请求方式为"GET"
@@ -93,133 +106,122 @@ public class QRCodeUtil {
             InputStream inStream = conn.getInputStream();
             //得到图片的二进制数据，以二进制封装得到数据，具有通用性
             byte[] data = readInputStream(inStream);
-
+            
+            // 参数为空
+            File directory = new File("");
+            String courseFile = null;
+            try {
+                courseFile = directory.getCanonicalPath();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            log.warn("dirPath is =================={}", courseFile);
+            // 文件上传后的路径
+            String filePath = "";
+            String fileName = new StringBuffer(System.nanoTime() + ".jpg").toString();
+            if (courseFile.startsWith("/")) {
+                filePath = "/opt/ow/webapps/images/fosun-pdf-files/" + fileName;
+            } else {
+                filePath = "D:/downloads/" + fileName;
+            }
+            
             //new一个文件对象用来保存图片，默认保存当前工程根目录
-            File file = new File("imageLogo.jpg");
+            File file = new File(filePath);
+            
             //创建输出流
             FileOutputStream outStream = new FileOutputStream(file);
             //写入数据
             outStream.write(data);
             //关闭输出流
             outStream.close();
-
-            if (!file.exists()) {
-                log.error("" + imgPath + " 该文件不存在！");
-                return;
-            }
-
-            Image src = null;
+            
+            BufferedImage background = null;
             try {
-                src = ImageIO.read(new File("imageLogo.jpg"));
-            } catch (IOException e) {
+                
+                Image src = Toolkit.getDefaultToolkit().getImage(filePath);
+                BufferedImage image = toBufferedImage(src);
+                background = image;
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            int width = src.getWidth(null);
-            int height = src.getHeight(null);
-            if (needCompress) {
-                // 压缩LOGO
-                if (width > WIDTH) {
-                    width = WIDTH;
-                }
-                if (height > HEIGHT) {
-                    height = HEIGHT;
-                }
-
-                Image image = src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-                BufferedImage tag = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-                Graphics g = tag.getGraphics();
-                // 绘制缩小后的图
-                g.drawImage(image, 0, 0, null);
-                g.dispose();
-                src = image;
+            
+            int width = bufferedImage.getWidth(null);
+            int height = bufferedImage.getHeight(null);
+            int backgroundWidth = background.getWidth(null);
+            int backgroundHeight = background.getHeight(null);
+            
+            // 插入二维码
+            Graphics2D graph = background.createGraphics();
+            int x = 0;
+            int y = 0;
+            if (backgroundImage.contains("img_bg_fenxiang")) {
+                //二维码放中间
+                x = (backgroundWidth - width) / 2;
+                y = backgroundHeight - height - 164;
+            } else {
+                //二维码位置调整
+                x = 45;
+                y = backgroundHeight - height - 31;
             }
-
-            // 插入LOGO
-            Graphics2D graph = source.createGraphics();
-            int x = (QRCODE_SIZE - width) / 2;
-            int y = (QRCODE_SIZE - height) / 2;
-            graph.drawImage(src, x, y, width, height, null);
+            graph.drawImage(bufferedImage, x, y, width, height, null);
             Shape shape = new RoundRectangle2D.Float(x, y, width, width, 6, 6);
             graph.setStroke(new BasicStroke(3f));
             graph.draw(shape);
             graph.dispose();
-
-            file.delete();
+            //创建输出流
+            FileOutputStream out = new FileOutputStream(filePath);
+            //将绘制的图像生成至输出流
+            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+            encoder.encode(background);
+            String urlPath = getUrlPath(filePath);
+            //关闭输出流
+            out.close();
+            File fileToDelte = new File(filePath);
+            if (fileToDelte.exists()) {
+                fileToDelte.delete();
+            }
+            return urlPath;
         } catch (Exception e) {
-
+            
             e.printStackTrace();
         }
-
+        return null;
     }
-
+    
+    public BufferedImage toBufferedImage(Image image) {
+        if (image instanceof BufferedImage) {
+            return (BufferedImage) image;
+        }
+        // This code ensures that all the pixels in the image are loaded
+        image = new ImageIcon(image).getImage();
+        
+        // Create a buffered image using the default color model
+        int type = BufferedImage.TYPE_INT_RGB;
+        BufferedImage bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+        
+        // Copy image to buffered image
+        Graphics g = bimage.createGraphics();
+        // Paint the image onto the buffered image
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+        return bimage;
+    }
+    
     /**
      * 生成带logo二维码，并保存到磁盘
      *
-     * @param content
-     * @param imgPath      logo图片
-     * @param destPath
-     * @param needCompress
+     * @param content 二维码内容
+     * @param backImg 上面的图片
      * @throws Exception
      */
-    public static String encode(String content, String imgPath, String destPath, boolean needCompress) throws Exception {
-        BufferedImage image = genBarcode(content, imgPath, needCompress);
-
-        mkdirs(destPath);
-        //生成文件名
-        String fileName = "qrcode.jpg";
-        File file = new File(destPath + "/" + fileName);
-        ImageIO.write(image, FORMAT_NAME, file);
-
-        HashMap<String, Object> headers = new HashMap<>(3);
-        headers.put("secret-key", ProjectConstant.SECRET_KEY);
-        headers.put("identity-id", ProjectConstant.IDENTITY_ID);
-        String uploadFile = HttpClientUtil.uploadFile(ProjectConstant.FINAL_URL, headers, file);
-
-        JSONObject jsonObject = JSONObject.parseObject(uploadFile);
-        JSONObject data = jsonObject.getJSONObject("data");
-        String path = data.getString("path");
-        return path;
+    public String encode(String content, String backImg) throws Exception {
+        String imagePath = genBarcode(content, backImg);
+        return imagePath;
     }
-
-    public static void mkdirs(String destPath) {
-        File file = new File(destPath);
-        // 当文件夹不存在时，mkdirs会自动创建多层目录，区别于mkdir。(mkdir如果父目录不存在则会抛出异常)
-        if (!file.exists() && !file.isDirectory()) {
-            file.mkdirs();
-        }
-    }
-
-
-    /**
-     * 从二维码中，解析数据
-     *
-     * @param file 二维码图片文件
-     * @return 返回从二维码中解析到的数据值
-     * @throws Exception
-     */
-    public static String decode(File file) throws Exception {
-        BufferedImage image;
-        image = ImageIO.read(file);
-        if (image == null) {
-            return null;
-        }
-        BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(image);
-        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-        Result result;
-        Hashtable hints = new Hashtable();
-        hints.put(DecodeHintType.CHARACTER_SET, CHARSET);
-        result = new MultiFormatReader().decode(bitmap, hints);
-        String resultStr = result.getText();
-        return resultStr;
-    }
-
-    public static String decode(String path) throws Exception {
-        return QRCodeUtil.decode(new File(path));
-    }
-
-    public static BufferedImage genBarcode(String content, String imgPath, boolean needCompress) throws WriterException, IOException {
-        Map<EncodeHintType, Object> hint = new HashMap<EncodeHintType, Object>(5);
-        hint.put(EncodeHintType.CHARACTER_SET, "utf-8");
+    
+    public String genBarcode(String content, String backImg) throws WriterException, IOException {
+        Map<EncodeHintType, Object> hint = new HashMap<>(5);
+        hint.put(EncodeHintType.CHARACTER_SET, CHARSET);
         hint.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         // 生成二维码
         BitMatrix matrix = multiWriter.encode(content, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hint);
@@ -245,22 +247,14 @@ public class QRCodeUtil {
                 break;
             }
         }
-
+        
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 if (matrix.get(x, y)) {
-                    if ((x < stopx) && (y < stopx)) {
-                        Color color = new Color(231, 144, 56);
-                        int colorInt = color.getRGB();
-                        data[y * QRCODE_SIZE + x] = colorInt;
-                    } else {
-                        int num1 = (int) (50 - (50.0 - 13.0) / matrix.getHeight() * (y + 1));
-                        int num2 = (int) (165 - (165.0 - 72.0) / matrix.getHeight() * (y + 1));
-                        int num3 = (int) (162 - (162.0 - 107.0) / matrix.getHeight() * (y + 1));
-                        Color color = new Color(num1, num2, num3);
-                        int colorInt = color.getRGB();
-                        data[y * w + x] = colorInt;
-                    }
+                    Color color = new Color(0, 0, 0);
+                    int colorInt = color.getRGB();
+                    data[y * QRCODE_SIZE + x] = colorInt;
+                    
                 } else {
                     //白色
                     data[y * w + x] = -1;
@@ -270,8 +264,93 @@ public class QRCodeUtil {
         BufferedImage image = new BufferedImage(QRCODE_SIZE, QRCODE_SIZE,
                 BufferedImage.TYPE_INT_RGB);
         image.getRaster().setDataElements(0, 0, QRCODE_SIZE, QRCODE_SIZE, data);
-        insertImage(image, imgPath, needCompress);
-        return image;
+        //背景图上插入二维码
+        String path = insertImage(backImg, image);
+        return path;
     }
-
+    
+    
+    public String getUrlPath(String uploadFilePath) {
+        
+        String Objectkey = new StringBuffer("mydoc/").append(System.nanoTime()).append(FORMAT_NAME).toString();
+        String path = new StringBuffer(ossPath).append(Objectkey).toString();
+        
+        // 使用默认的OSS服务器地址创建OSSClient对象,OSS_ENDPOINT代表使用北京节点，北京节点要加上不然包异常
+        OSSClient client = new OSSClient(OSS_ENDPOINT, configFileProperty.getAccessKeyId(), configFileProperty.getAccessKeySecret());
+        
+        try {
+            log.warn("正在上传阿里云OSS...");
+            uploadFile(client, BUCKET_NAME, Objectkey, uploadFilePath);
+            log.warn("上传结束...");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return path;
+    }
+    
+    /**
+     * 创建Bucket
+     *
+     * @param client     OSSClient对象
+     * @param bucketName BUCKET名
+     * @throws OSSException
+     * @throws ClientException
+     */
+    public void ensureBucket(OSSClient client, String bucketName) throws OSSException, ClientException {
+        try {
+            client.createBucket(bucketName);
+        } catch (ServiceException e) {
+            if (!OSSErrorCode.BUCKES_ALREADY_EXISTS.equals(e.getErrorCode())) {
+                throw e;
+            }
+        }
+    }
+    
+    /**
+     * 把Bucket设置成所有人可读
+     *
+     * @param client     OSSClient对象
+     * @param bucketName Bucket名
+     * @throws OSSException
+     * @throws ClientException
+     */
+    private void setBucketPublicReadable(OSSClient client, String bucketName) throws
+            OSSException, ClientException {
+        //创建bucket
+        client.createBucket(bucketName);
+        
+        //设置bucket的访问权限， public-read-write权限
+        client.setBucketAcl(bucketName, CannedAccessControlList.PublicRead);
+    }
+    
+    /**
+     * 上传文件
+     *
+     * @param client     OSSClient对象
+     * @param bucketName Bucket名
+     * @param Objectkey  上传到OSS起的名
+     * @param filename   本地文件名
+     * @throws OSSException
+     * @throws ClientException
+     * @throws FileNotFoundException
+     */
+    private void uploadFile(OSSClient client, String bucketName, String Objectkey, String filename)
+            throws OSSException, ClientException, FileNotFoundException {
+        File file = new File(filename);
+        ObjectMetadata objectMeta = new ObjectMetadata();
+        objectMeta.setContentLength(file.length());
+        //判断上传类型，多的可根据自己需求来判定
+        if (filename.endsWith("xml")) {
+            objectMeta.setContentType("text/xml");
+        } else if (filename.endsWith("jpg")) {
+            objectMeta.setContentType("image/jpeg");
+        } else if (filename.endsWith("png")) {
+            objectMeta.setContentType("image/png");
+        }
+        
+        InputStream input = new FileInputStream(file);
+        client.putObject(bucketName, Objectkey, input, objectMeta);
+    }
+    
+    
 }

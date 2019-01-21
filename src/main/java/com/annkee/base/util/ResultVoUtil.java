@@ -1,7 +1,7 @@
 package com.annkee.base.util;
 
+import com.annkee.base.enums.ResultCodeEnum;
 import com.annkee.base.vo.ResultVO;
-//: 返回结果格式文档
 
 /**
  * @author wangan
@@ -27,6 +27,8 @@ public class ResultVoUtil {
         resultVO.setMessage(message);
         return resultVO;
     }
-
+    public static ResultVO error(ResultCodeEnum resultCodeEnum) {
+        ResultVO resultVO = new ResultVO(resultCodeEnum);
+        return resultVO;
+    }
 }
-///:`

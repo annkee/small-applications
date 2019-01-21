@@ -65,3 +65,10 @@ download-qr-param: http://localhost:8000/dl/download.html?appId=
 logging:
   config: classpath:logback.xml
   level: DEBUG
+
+
+aliyun:
+  access_key_id: LTAIDNv8iBs6YEem
+  access_key_secret: NAXD2Z4x1tMbY2dEn7YrqmG2hX7Tn9
+
+  salt: 2018

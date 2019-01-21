@@ -215,6 +215,13 @@
             <version>3.3.0</version>
         </dependency>
 
+        <!-- aliyun oss -->
+        <dependency>
+            <groupId>com.aliyun.openservices</groupId>
+            <artifactId>aliyun-openservices</artifactId>
+            <version>OTS-2.0.4</version>
+        </dependency>
+
         <!--mq消息-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -330,6 +337,42 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
             <version>2.2.1</version>
+        </dependency>
+
+        <!--阿里云短信-->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-core</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-ecs</artifactId>
+            <version>4.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.mns</groupId>
+            <artifactId>aliyun-sdk-mns</artifactId>
+            <version>1.1.8</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>httpcore</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>

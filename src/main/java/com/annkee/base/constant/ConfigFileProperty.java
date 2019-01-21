@@ -20,8 +20,14 @@ public class ConfigFileProperty {
     @Value("${spring.redis.port}")
     private String port;
     
-//    @Value("${spring.redis.password}")
-//    private String redisPassword;
+    @Value("${aliyun.access_key_id}")
+    private String accessKeyId;
+    
+    @Value("${aliyun.access_key_secret}")
+    private String accessKeySecret;
+    
+    @Value("${aliyun.salt}")
+    private String salt;
     
     public ConfigFileProperty() {
     }
