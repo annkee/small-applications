@@ -5,11 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.*;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.mail.internet.*;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -115,4 +118,91 @@ public class MailService {
         Transport.send(message);
     }
     
+    /**
+     * 发送邮件
+     *
+     * @param emailTo  收件人，用分号分隔的多个收件人
+     * @param emailMsg 邮件内容
+     * @param files    文件路径
+     * @param title    主题
+     * @throws AddressException
+     * @throws MessagingException
+     */
+    public static void sendMail(String emailTo, String emailMsg, List<String> files, String title) throws MessagingException {
+        
+        log.info("收件人为【{}】", emailTo);
+        Properties props = new Properties();
+        // 表示SMTP发送邮件，需要进行身份验证
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.host", HOST);
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.port", PORT);
+        props.put("mail.smtp.port", PORT);
+        
+        // 发件人的账号
+        props.put("mail.user", USERNAME);
+        // 访问SMTP服务时需要提供的密码(邮箱密码)
+        props.put("mail.password", PASSWORD);
+        
+        // 构建授权信息，用于进行SMTP进行身份验证
+        Authenticator authenticator = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(USERNAME, PASSWORD);
+            }
+        };
+        
+        Session session = Session.getInstance(props, authenticator);
+        
+        // 创建一个Message，它相当于是邮件内容
+        Message message = new MimeMessage(session);
+        try {
+            message.setSubject(title);
+            /**
+             * 2. 设置发件人
+             * 其中 InternetAddress 的三个参数分别为: 邮箱, 显示的昵称(只用于显示, 没有特别的要求), 昵称的字符集编码
+             */
+            message.setFrom(new InternetAddress(USERNAME, USERNAME, "UTF-8"));
+            
+            /**
+             * 3，设置收件人
+             * To收件人   CC 抄送  BCC密送
+             */
+            InternetAddress[] address = null;
+            ArrayList<InternetAddress> objects = new ArrayList<InternetAddress>();
+            
+            for (int i = 0; i < emailTo.split(";").length; i++) {
+                objects.add(new InternetAddress(emailTo.split(";")[i], "", "UTF-8"));
+            }
+            address = objects.toArray(new InternetAddress[objects.size()]);
+            
+            message.setRecipients(MimeMessage.RecipientType.TO, address);
+            
+            //   设置邮件的文本内容
+            BodyPart contentPart = new MimeBodyPart();
+            contentPart.setContent(emailMsg, "text/html;charset=utf-8");
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(contentPart);
+            //添加附件
+            if (files != null) {
+                for (String attachment : files) {
+                    BodyPart attachmentPart = new MimeBodyPart();
+                    DataSource source = new FileDataSource(attachment);
+                    attachmentPart.setDataHandler(new DataHandler(source));
+                    //避免中文乱码的处理
+                    String substring = attachment.substring(attachment.lastIndexOf("/") + 1);
+                    String s = MimeUtility.encodeText(substring);
+                    attachmentPart.setFileName(s);
+                    multipart.addBodyPart(attachmentPart);
+                }
+            }
+            //将multipart对象放到message中
+            message.setContent(multipart, "text/html;charset=utf-8");
+            Transport.send(message);
+            log.warn("====to 【{}】邮件发送成功====", emailTo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+    }
 }
