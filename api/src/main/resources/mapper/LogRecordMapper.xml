@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.annkee.applications.dao.LogRecordMapper">
+    <resultMap id="BaseResultMap" type="com.annkee.model.LogRecord">
+        <constructor>
+            <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long"/>
+            <arg column="request_context_path" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="request_ip" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="request_method" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="request_query_string" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="request_session" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="request_uri" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="response_status" jdbcType="INTEGER" javaType="java.lang.Integer"/>
+            <arg column="response_string" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+            <arg column="args" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="class_method" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <arg column="params" jdbcType="VARCHAR" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        ,
+        request_context_path,
+        request_ip,
+        request_method,
+        request_query_string,
+        request_session,
+        request_uri,
+        response_status,
+        response_string,
+        create_time,
+        args,
+        class_method,
+        params
+    </sql>
+    <insert id="insertSelective" parameterType="com.annkee.model.LogRecord">
+        insert into log_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="requestContextPath != null">
+                request_context_path,
+            </if>
+            <if test="requestIp != null">
+                request_ip,
+            </if>
+            <if test="requestMethod != null">
+                request_method,
+            </if>
+            <if test="requestQueryString != null">
+                request_query_string,
+            </if>
+            <if test="requestSession != null">
+                request_session,
+            </if>
+            <if test="requestUri != null">
+                request_uri,
+            </if>
+            <if test="responseStatus != null">
+                response_status,
+            </if>
+            <if test="responseString != null">
+                response_string,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="args != null">
+                args,
+            </if>
+            <if test="classMethod != null">
+                class_method,
+            </if>
+            <if test="params != null">
+                params,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="requestContextPath != null">
+                #{requestContextPath,jdbcType=VARCHAR},
+            </if>
+            <if test="requestIp != null">
+                #{requestIp,jdbcType=VARCHAR},
+            </if>
+            <if test="requestMethod != null">
+                #{requestMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="requestQueryString != null">
+                #{requestQueryString,jdbcType=VARCHAR},
+            </if>
+            <if test="requestSession != null">
+                #{requestSession,jdbcType=VARCHAR},
+            </if>
+            <if test="requestUri != null">
+                #{requestUri,jdbcType=VARCHAR},
+            </if>
+            <if test="responseStatus != null">
+                #{responseStatus,jdbcType=INTEGER},
+            </if>
+            <if test="responseString != null">
+                #{responseString,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="args != null">
+                #{args,jdbcType=VARCHAR},
+            </if>
+            <if test="classMethod != null">
+                #{classMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="params != null">
+                #{params,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+</mapper>
